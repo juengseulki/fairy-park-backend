@@ -21,3 +21,9 @@ export async function createUser({ email, password, nickname }) {
     },
   });
 }
+
+export async function findUserByEmailWithPassword(email) {
+  return prisma.user.findUnique({
+    where: { email },
+  });
+}
