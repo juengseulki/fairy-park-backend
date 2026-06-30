@@ -5,8 +5,15 @@ import {
   findUserByEmailWithPassword,
   findUserById,
 } from "../repositories/userRepository.js";
-import { generateAccessToken, generateRefreshToken } from "../utils/token.js";
-import { createRefreshToken } from "../repositories/refreshTokenRepository.js";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken,
+} from "../utils/token.js";
+import {
+  createRefreshToken,
+  findRefreshToken,
+} from "../repositories/refreshTokenRepository.js";
 
 //회원가입
 export async function signup({ email, password, nickname }) {
@@ -45,6 +52,7 @@ export async function login({ email, password }) {
     throw error;
   }
 
+  //토큰
   const accessToken = generateAccessToken(user);
   const refreshToken = generateRefreshToken(user);
 
@@ -78,4 +86,42 @@ export async function getMe(userId) {
   }
 
   return user;
+}
+
+export async function refreshAccessToken(refreshToken) {
+  if (!refreshToken) {
+    const error = new Error("리프레시 토큰이 없습니다.");
+    error.status = 401;
+    throw error;
+  }
+
+  const decoded = verifyRefreshToken(refreshToken);
+
+  const savedToken = await findRefreshToken(refreshToken);
+
+  if (!savedToken) {
+    const error = new Error("유효하지 않은 리프레시 토큰입니다.");
+    error.status = 401;
+    throw error;
+  }
+
+  if (savedToken.expiresAt < new Date()) {
+    const error = new Error("리프레시 토큰이 만료되었습니다.");
+    error.status = 401;
+    throw error;
+  }
+
+  const user = await findUserById(decoded.id);
+
+  if (!user) {
+    const error = new Error("사용자를 찾을 수 없습니다.");
+    error.status = 404;
+    throw error;
+  }
+
+  const accessToken = generateAccessToken(user);
+
+  return {
+    accessToken,
+  };
 }
