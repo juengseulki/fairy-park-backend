@@ -1,5 +1,6 @@
 import axios from "axios";
 import { XMLParser } from "fast-xml-parser";
+import { mapParkingList } from "../utils/parkingMapper.js";
 
 const parser = new XMLParser({
   ignoreAttributes: false,
@@ -20,5 +21,7 @@ export async function getParkings(query) {
 
   const parsed = parser.parse(response.data);
 
-  return parsed;
+  const items = parsed.response?.body?.items?.item ?? [];
+
+  return mapParkingList(items);
 }
