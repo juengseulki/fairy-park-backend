@@ -13,6 +13,7 @@ import {
 import {
   createRefreshToken,
   findRefreshToken,
+  deleteRefreshToken,
 } from "../repositories/refreshTokenRepository.js";
 
 //회원가입
@@ -124,4 +125,12 @@ export async function refreshAccessToken(refreshToken) {
   return {
     accessToken,
   };
+}
+
+export async function logout(refreshToken) {
+  if (!refreshToken) {
+    return;
+  }
+
+  await deleteRefreshToken(refreshToken);
 }

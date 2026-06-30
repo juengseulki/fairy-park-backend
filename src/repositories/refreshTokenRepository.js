@@ -15,3 +15,11 @@ export async function findRefreshToken(token) {
     where: { token },
   });
 }
+
+export async function deleteRefreshToken(token) {
+  return prisma.refreshToken.deleteMany({
+    where: {
+      token,
+    },
+  });
+}
