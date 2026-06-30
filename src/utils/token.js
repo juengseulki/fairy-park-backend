@@ -7,8 +7,16 @@ export function generateAccessToken(user) {
       email: user.email,
     },
     process.env.JWT_SECRET,
+    { expiresIn: "15m" },
+  );
+}
+
+export function generateRefreshToken(user) {
+  return jwt.sign(
     {
-      expiresIn: "1h",
+      id: user.id,
     },
+    process.env.REFRESH_SECRET,
+    { expiresIn: "7d" },
   );
 }

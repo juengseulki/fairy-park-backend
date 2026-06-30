@@ -4,8 +4,10 @@ import {
   findUserByEmail,
   findUserByEmailWithPassword,
 } from "../repositories/userRepository.js";
-import { generateAccessToken } from "../utils/token.js";
+import { generateAccessToken, generateRefreshToken } from "../utils/token.js";
+import { createRefreshToken } from "../repositories/refreshTokenRepository.js";
 
+//회원가입
 export async function signup({ email, password, nickname }) {
   const existingUser = await findUserByEmail(email);
 
@@ -24,6 +26,7 @@ export async function signup({ email, password, nickname }) {
   });
 }
 
+//로그인
 export async function login({ email, password }) {
   const user = await findUserByEmailWithPassword(email);
 
@@ -42,9 +45,20 @@ export async function login({ email, password }) {
   }
 
   const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken(user);
+
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 7);
+
+  await createRefreshToken({
+    token: refreshToken,
+    userId: user.id,
+    expiresAt,
+  });
 
   return {
     accessToken,
+    refreshToken,
     user: {
       id: user.id,
       email: user.email,
