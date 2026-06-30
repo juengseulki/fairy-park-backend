@@ -3,6 +3,7 @@ import {
   createUser,
   findUserByEmail,
   findUserByEmailWithPassword,
+  findUserById,
 } from "../repositories/userRepository.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/token.js";
 import { createRefreshToken } from "../repositories/refreshTokenRepository.js";
@@ -65,4 +66,16 @@ export async function login({ email, password }) {
       nickname: user.nickname,
     },
   };
+}
+
+export async function getMe(userId) {
+  const user = await findUserById(userId);
+
+  if (!user) {
+    const error = new Error("사용자를 찾을 수 없습니다.");
+    error.status = 404;
+    throw error;
+  }
+
+  return user;
 }

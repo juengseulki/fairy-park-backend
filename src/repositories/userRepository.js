@@ -27,3 +27,15 @@ export async function findUserByEmailWithPassword(email) {
     where: { email },
   });
 }
+
+export async function findUserById(id) {
+  return prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      email: true,
+      nickname: true,
+      createdAt: true,
+    },
+  });
+}

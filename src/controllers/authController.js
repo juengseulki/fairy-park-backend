@@ -1,4 +1,4 @@
-import { login, signup } from "../services/authService.js";
+import { login, signup, getMe } from "../services/authService.js";
 
 //회원가입
 export async function signupController(req, res, next) {
@@ -29,6 +29,18 @@ export async function loginController(req, res, next) {
     return res.status(200).json({
       message: "로그인에 성공했습니다.",
       data,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getMeController(req, res, next) {
+  try {
+    const user = await getMe(req.user.id);
+
+    return res.status(200).json({
+      data: user,
     });
   } catch (error) {
     next(error);
