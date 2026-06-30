@@ -1,4 +1,10 @@
-import { login, signup, getMe } from "../services/authService.js";
+import {
+  login,
+  signup,
+  getMe,
+  refreshAccessToken,
+  logout,
+} from "../services/authService.js";
 
 //회원가입
 export async function signupController(req, res, next) {
@@ -41,6 +47,37 @@ export async function getMeController(req, res, next) {
 
     return res.status(200).json({
       data: user,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function refreshController(req, res, next) {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    const data = await refreshAccessToken(refreshToken);
+
+    return res.status(200).json({
+      message: "토큰이 재발급되었습니다.",
+      data,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function logoutController(req, res, next) {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    await logout(refreshToken);
+
+    res.clearCookie("refreshToken");
+
+    return res.status(200).json({
+      message: "로그아웃이 완료되었습니다.",
     });
   } catch (error) {
     next(error);

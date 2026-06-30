@@ -9,3 +9,17 @@ export async function createRefreshToken({ token, userId, expiresAt }) {
     },
   });
 }
+
+export async function findRefreshToken(token) {
+  return prisma.refreshToken.findUnique({
+    where: { token },
+  });
+}
+
+export async function deleteRefreshToken(token) {
+  return prisma.refreshToken.deleteMany({
+    where: {
+      token,
+    },
+  });
+}
