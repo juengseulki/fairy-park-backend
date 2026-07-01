@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 
 import authRoutes from "./routes/authRoutes.js";
+import parkingRoutes from "./routes/parkingRoutes.js";
 
 const app = express();
 
@@ -11,6 +12,8 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
+
+app.use("/api/parkings", parkingRoutes);
 
 app.use((error, req, res, next) => {
   const status = error.status ?? 500;
