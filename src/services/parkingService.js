@@ -1,6 +1,7 @@
 import axios from "axios";
 import { XMLParser } from "fast-xml-parser";
 import { mapParkingList, mapParkingDetail } from "../utils/parkingMapper.js";
+import { calculateDistanceKm } from "../utils/distance.js";
 
 const parser = new XMLParser({
   ignoreAttributes: false,
@@ -122,4 +123,49 @@ export async function getParkingDetail(id) {
   }
 
   return mapParkingDetail(parking);
+}
+
+export async function getNearbyParkings(query) {
+  const lat = Number(query.lat);
+  const lng = Number(query.lng);
+  const radius = Number(query.radius ?? 3);
+  const limit = Number(query.limit ?? 20);
+
+  if (!lat || !lng) {
+    const error = new Error("위도와 경도는 필수입니다.");
+    error.status = 400;
+    throw error;
+  }
+
+  const allParkings = await getCachedParkings();
+
+  const nearbyParkings = allParkings
+    .filter((parking) => parking.latitude && parking.longitude)
+    .map((parking) => {
+      const distanceKm = calculateDistanceKm(
+        lat,
+        lng,
+        parking.latitude,
+        parking.longitude,
+      );
+
+      return {
+        ...parking,
+        distanceKm: Number(distanceKm.toFixed(2)),
+      };
+    })
+    .filter((parking) => parking.distanceKm <= radius)
+    .sort((a, b) => a.distanceKm - b.distanceKm)
+    .slice(0, limit);
+
+  return {
+    items: nearbyParkings,
+    meta: {
+      lat,
+      lng,
+      radius,
+      limit,
+      totalCount: nearbyParkings.length,
+    },
+  };
 }
