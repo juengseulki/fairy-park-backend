@@ -53,7 +53,7 @@ async function fetchAllParkings() {
   return allItems;
 }
 
-async function getCachedParkings() {
+export async function getCachedParkings() {
   const now = Date.now();
 
   const isCacheValid =
