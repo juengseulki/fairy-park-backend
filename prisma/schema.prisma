@@ -15,6 +15,7 @@ model User {
 
   refreshTokens RefreshToken[]
   favorites Favorite[]
+  histories     ParkingHistory[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -41,4 +42,16 @@ model Favorite {
   createdAt DateTime @default(now())
 
   @@unique([parkingId, userId])
+}
+
+model ParkingHistory {
+  id         String   @id @default(uuid())
+  userId     String
+  parkingId  String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  viewedAt DateTime @updatedAt
+
+  @@unique([userId, parkingId])
 }
