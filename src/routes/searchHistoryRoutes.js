@@ -5,9 +5,12 @@ import {
   getMySearchHistoriesController,
   removeSearchHistoryController,
   removeAllSearchHistoriesController,
+  getPopularSearchKeywordsController,
 } from "../controllers/searchHistoryController.js";
 
 const router = express.Router();
+
+router.get("/popular", getPopularSearchKeywordsController);
 
 router.use(authenticate);
 

@@ -5,6 +5,8 @@ import {
   deleteAllSearchHistories,
 } from "../repositories/searchHistoryRepository.js";
 
+import { getPopularSearchHistories } from "../repositories/searchHistoryRepository.js";
+
 export async function addSearchHistory(userId, keyword) {
   const trimmedKeyword = keyword?.trim();
 
@@ -27,4 +29,13 @@ export async function removeSearchHistory(userId, id) {
 
 export async function removeAllSearchHistories(userId) {
   return deleteAllSearchHistories(userId);
+}
+
+export async function getPopularSearchKeywords(limit) {
+  const histories = await getPopularSearchHistories(limit);
+
+  return histories.map((history) => ({
+    keyword: history.keyword,
+    count: history._sum.count,
+  }));
 }

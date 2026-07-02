@@ -58,9 +58,10 @@ model ParkingHistory {
 }
 
 model SearchHistory {
-  id        String   @id @default(uuid())
-  userId    String
-  keyword   String
+  id         String   @id @default(uuid())
+  userId     String
+  keyword    String
+  count      Int      @default(1)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
