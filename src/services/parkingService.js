@@ -185,3 +185,15 @@ export async function getNearbyParkings(query) {
     },
   };
 }
+
+export async function refreshParkingCache() {
+  const allItems = await fetchAllParkings();
+
+  parkingCache = mapParkingList(allItems);
+  parkingCacheTime = Date.now();
+
+  return {
+    totalCount: parkingCache.length,
+    refreshedAt: new Date(),
+  };
+}
