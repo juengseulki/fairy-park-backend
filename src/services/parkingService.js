@@ -1,7 +1,11 @@
 import axios from "axios";
 import { XMLParser } from "fast-xml-parser";
-import { mapParkingList, mapParkingDetail } from "../utils/parkingMapper.js";
+import { mapParkingList } from "../utils/parkingMapper.js";
 import { calculateDistanceKm } from "../utils/distance.js";
+import {
+  applyParkingFilters,
+  applyParkingSort,
+} from "../utils/parkingFilter.js";
 
 const parser = new XMLParser({
   ignoreAttributes: false,
@@ -84,22 +88,30 @@ export async function getParkings(query) {
   const numOfRows = Number(query.numOfRows ?? DEFAULT_NUM_OF_ROWS);
   const keyword = query.keyword?.trim();
 
-  if (keyword) {
+  if (keyword || query.isFree || query.openNow || query.sort) {
     const allParkings = await getCachedParkings();
-    const filteredParkings = filterParkingsByKeyword(allParkings, keyword);
+
+    let result = filterParkingsByKeyword(allParkings, keyword);
+
+    result = applyParkingFilters(result, query);
+    result = applyParkingSort(result, query);
 
     return {
-      items: filteredParkings,
+      items: result,
       meta: {
         pageNo: 1,
-        numOfRows: filteredParkings.length,
-        totalCount: filteredParkings.length,
+        numOfRows: result.length,
+        totalCount: result.length,
       },
     };
   }
 
   const items = await fetchParkingPage(pageNo, numOfRows);
-  const mappedItems = mapParkingList(items);
+
+  let mappedItems = mapParkingList(items);
+
+  mappedItems = applyParkingFilters(mappedItems, query);
+  mappedItems = applyParkingSort(mappedItems, query);
 
   return {
     items: mappedItems,
@@ -122,7 +134,7 @@ export async function getParkingDetail(id) {
     throw error;
   }
 
-  return mapParkingDetail(parking);
+  return parking;
 }
 
 export async function getNearbyParkings(query) {
@@ -139,7 +151,7 @@ export async function getNearbyParkings(query) {
 
   const allParkings = await getCachedParkings();
 
-  const nearbyParkings = allParkings
+  let nearbyParkings = allParkings
     .filter((parking) => parking.latitude && parking.longitude)
     .map((parking) => {
       const distanceKm = calculateDistanceKm(
@@ -154,9 +166,15 @@ export async function getNearbyParkings(query) {
         distanceKm: Number(distanceKm.toFixed(2)),
       };
     })
-    .filter((parking) => parking.distanceKm <= radius)
-    .sort((a, b) => a.distanceKm - b.distanceKm)
-    .slice(0, limit);
+    .filter((parking) => parking.distanceKm <= radius);
+
+  nearbyParkings = applyParkingFilters(nearbyParkings, query);
+  nearbyParkings = applyParkingSort(nearbyParkings, {
+    ...query,
+    sort: query.sort ?? "distance",
+  });
+
+  nearbyParkings = nearbyParkings.slice(0, limit);
 
   return {
     items: nearbyParkings,
