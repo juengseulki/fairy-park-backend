@@ -10,10 +10,14 @@ export async function upsertSearchHistory(userId, keyword) {
     },
     update: {
       searchedAt: new Date(),
+      count: {
+        increment: 1,
+      },
     },
     create: {
       userId,
       keyword,
+      count: 1,
     },
   });
 }
@@ -39,5 +43,20 @@ export async function deleteSearchHistory(userId, id) {
 export async function deleteAllSearchHistories(userId) {
   return prisma.searchHistory.deleteMany({
     where: { userId },
+  });
+}
+
+export async function getPopularSearchHistories(limit = 10) {
+  return prisma.searchHistory.groupBy({
+    by: ["keyword"],
+    _sum: {
+      count: true,
+    },
+    orderBy: {
+      _sum: {
+        count: "desc",
+      },
+    },
+    take: limit,
   });
 }
