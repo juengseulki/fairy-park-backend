@@ -78,9 +78,7 @@ export async function getCachedParkings() {
 function filterParkingsByKeyword(parkings, keyword) {
   if (!keyword) return parkings;
 
-  return parkings.filter((parking) =>
-    [parking.name, parking.address].some((value) => value?.includes(keyword)),
-  );
+  return parkings.filter((parking) => parking.name?.includes(keyword));
 }
 
 export async function getParkings(query) {

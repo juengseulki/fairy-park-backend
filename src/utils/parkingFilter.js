@@ -40,8 +40,18 @@ function isOpenNow(parking) {
   return openTime <= currentTime && currentTime <= closeTime;
 }
 
+function filterByRegion(parkings, region) {
+  if (!region) return parkings;
+
+  return parkings.filter((parking) => parking.address?.includes(region));
+}
+
 export function applyParkingFilters(parkings, query) {
   let result = [...parkings];
+
+  if (query.region) {
+    result = filterByRegion(result, query.region.trim());
+  }
 
   if (isTrue(query.isFree)) {
     result = result.filter(isFreeParking);
