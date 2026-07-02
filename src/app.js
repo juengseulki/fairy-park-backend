@@ -7,6 +7,8 @@ import parkingRoutes from "./routes/parkingRoutes.js";
 import favoriteRoutes from "./routes/favoriteRoutes.js";
 import historyRoutes from "./routes/historyRoutes.js";
 import searchHistoryRoutes from "./routes/searchHistoryRoutes.js";
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./config/swagger.js";
 
 const app = express();
 
@@ -23,6 +25,8 @@ app.use("/api/favorites", favoriteRoutes);
 app.use("/api/history", historyRoutes);
 
 app.use("/api/search-history", searchHistoryRoutes);
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use((error, req, res, next) => {
   const status = error.status ?? 500;
